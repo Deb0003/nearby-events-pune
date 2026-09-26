@@ -313,7 +313,7 @@ function ListEventModal({
 }) {
   const [category, setCategory] = useState<CategoryId>(CATS[0].id);
   return (
-    <div className="fixed inset-0 bg-black/45 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/45 flex items-center justify-center z-[9999] p-4">
       <div className="bg-panel rounded-2xl max-w-[440px] w-full max-h-[86vh] overflow-y-auto p-5">
         <button className="float-right text-lg text-sub" onClick={onClose}>
           ✕
