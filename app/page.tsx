@@ -24,6 +24,7 @@ export default function HomePage() {
     new Set(CATS.flatMap((c) => SUBCATS[c.id].map((s) => `${c.id}|${s}`)))
   );
   const [activeDate, setActiveDate] = useState<string>("all");
+  const [customDate, setCustomDate] = useState<string>("");
   const [selected, setSelected] = useState<EventRow | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [justSubmitted, setJustSubmitted] = useState<EventRow | null>(null);
@@ -50,9 +51,10 @@ export default function HomePage() {
       visible:
         activeCats.has(ev.category) &&
         activeSubs.has(`${ev.category}|${ev.sub_category}`) &&
-        (ev.status === "pending" || inDateBucket(ev.start_date, activeDate, TODAY)),
+        (ev.status === "pending" ||
+          (customDate ? ev.start_date === customDate : inDateBucket(ev.start_date, activeDate, TODAY))),
     }));
-  }, [events, justSubmitted, activeCats, activeSubs, activeDate]);
+  }, [events, justSubmitted, activeCats, activeSubs, activeDate, customDate]);
 
   function toggleCat(id: CategoryId) {
     setActiveCats((prev) => {
@@ -152,21 +154,46 @@ export default function HomePage() {
         ))}
       </div>
 
-      <div className="flex gap-1.5 px-4 pb-2 bg-panel">
+      <div className="flex items-center gap-1.5 px-4 pb-2 bg-panel">
         {DATE_OPTIONS.map(([id, label]) => (
           <button
             key={id}
-            onClick={() => setActiveDate(id)}
+            onClick={() => {
+              setActiveDate(id);
+              setCustomDate("");
+            }}
             className="shrink-0 px-2.5 py-1 rounded-full text-[11.5px] border"
             style={{
-              background: activeDate === id ? "var(--ink)" : "var(--bg)",
-              color: activeDate === id ? "var(--bg)" : "var(--ink)",
+              background: !customDate && activeDate === id ? "var(--ink)" : "var(--bg)",
+              color: !customDate && activeDate === id ? "var(--bg)" : "var(--ink)",
               borderColor: "var(--line)",
             }}
           >
             {label}
           </button>
         ))}
+        <span className="text-[11px] text-sub px-1">or</span>
+        <input
+          type="date"
+          value={customDate}
+          min="2026-09-23"
+          onChange={(e) => setCustomDate(e.target.value)}
+          className="shrink-0 px-2 py-1 rounded-full text-[11.5px] border"
+          style={{
+            background: customDate ? "var(--ink)" : "var(--bg)",
+            color: customDate ? "var(--bg)" : "var(--ink)",
+            borderColor: "var(--line)",
+            colorScheme: customDate ? "dark" : "light",
+          }}
+        />
+        {customDate && (
+          <button
+            onClick={() => setCustomDate("")}
+            className="shrink-0 text-[11px] text-sub underline px-1"
+          >
+            clear
+          </button>
+        )}
       </div>
 
       <div className="flex gap-1.5 overflow-x-auto px-4 pb-2.5 border-b border-line bg-panel">
