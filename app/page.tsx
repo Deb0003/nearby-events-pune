@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabaseClient";
 import { CATS, SUBCATS, AREAS, areaPos, inDateBucket, type EventRow, type CategoryId } from "@/lib/data";
+
+// Leaflet touches `window`, so it must be client-only, loaded after mount.
+const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 const TODAY = new Date("2026-09-23");
 const DATE_OPTIONS = [
@@ -116,8 +120,6 @@ export default function HomePage() {
     formEvent.currentTarget.reset();
   }
 
-  const catMap = Object.fromEntries(CATS.map((c) => [c.id, c]));
-
   return (
     <div className="flex flex-col h-screen">
       <header className="flex items-start justify-between gap-3 px-4 pt-4 pb-2.5 border-b border-line bg-panel">
@@ -190,33 +192,10 @@ export default function HomePage() {
       </div>
 
       <main className="flex-1 relative overflow-hidden flex">
-        <div className="flex-1 relative overflow-auto" style={{ background: "var(--map)" }}>
-          <div className="relative" style={{ width: 1000, height: 900, minWidth: "100%", minHeight: "100%" }}>
-            {AREAS.map((a) => (
-              <div
-                key={a.name}
-                className="absolute text-[11px] text-sub opacity-75 italic pointer-events-none"
-                style={{ left: `${a.x}%`, top: `${a.y}%` }}
-              >
-                {a.name}
-              </div>
-            ))}
-            {visibleEvents.map(({ ev, visible }) => {
-              const pos = areaPos(ev.area);
-              const cat = catMap[ev.category];
-              return (
-                <div
-                  key={ev.id}
-                  title={ev.title}
-                  onClick={() => setSelected(ev)}
-                  className={`pin ${visible ? "" : "dim"} ${ev.status === "pending" ? "pending" : ""}`}
-                  style={{ left: `${pos.x}%`, top: `${pos.y}%`, background: cat?.color }}
-                />
-              );
-            })}
-          </div>
+        <div className="flex-1 relative" style={{ background: "var(--map)" }}>
+          <MapView events={visibleEvents} onSelect={setSelected} />
           {loading && (
-            <div className="absolute inset-0 flex items-center justify-center text-sub text-sm">
+            <div className="absolute inset-0 flex items-center justify-center text-sub text-sm pointer-events-none">
               Loading events…
             </div>
           )}
