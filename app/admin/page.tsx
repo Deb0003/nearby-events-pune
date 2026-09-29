@@ -42,3 +42,60 @@ export default function AdminPage() {
     return (
       <div className="max-w-sm mx-auto mt-24 px-4">
         <h1 className="text-lg font-semibold mb-2">Admin — moderation queue</h1>
+        <p className="text-sm text-sub mb-4">Enter the admin secret to view pending events.</p>
+        <input
+          type="password"
+          value={secret}
+          onChange={(e) => setSecret(e.target.value)}
+          placeholder="Admin secret"
+          className="w-full px-3 py-2 rounded-lg border border-line mb-2 bg-panel"
+        />
+        {err && <p className="text-sm text-red-600 mb-2">{err}</p>}
+        <button
+          onClick={unlock}
+          disabled={loading}
+          className="w-full py-2.5 rounded-lg bg-ink text-bg font-semibold"
+        >
+          {loading ? "Checking…" : "Unlock"}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-8">
+      <h1 className="text-lg font-semibold mb-1">Pending events ({events.length})</h1>
+      <p className="text-sm text-sub mb-6">Approve or reject events submitted through the public form.</p>
+      {events.length === 0 && <p className="text-sm text-sub">Nothing pending right now.</p>}
+      <div className="flex flex-col gap-3">
+        {events.map((ev) => (
+          <div key={ev.id} className="border border-line rounded-xl p-4 bg-panel">
+            <div className="font-semibold">{ev.title}</div>
+            <div className="text-sm text-sub">
+              {ev.category} / {ev.sub_category} · {ev.start_date} {ev.start_time}
+            </div>
+            <div className="text-sm text-sub">{ev.venue_name}, {ev.area}</div>
+            <div className="text-sm text-sub">Organizer: {ev.organizer_name}</div>
+            <p className="text-sm mt-2">{ev.description}</p>
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={() => decide(ev.id, "approved")}
+                className="px-3 py-1.5 rounded-lg text-sm font-semibold text-white"
+                style={{ background: "#2f9e44" }}
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => decide(ev.id, "rejected")}
+                className="px-3 py-1.5 rounded-lg text-sm font-semibold text-white"
+                style={{ background: "#b5541c" }}
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
